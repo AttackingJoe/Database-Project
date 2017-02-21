@@ -1,8 +1,8 @@
 E:
-    Characters
-    Weapons
-    Monster-Types
-    Locations
+    Characters - C
+    Weapons - J
+    Monster-Types - S
+    Locations - B
     
 WE:
     Summoned Monsters
