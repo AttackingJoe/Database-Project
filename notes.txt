@@ -1,0 +1,28 @@
+E:
+    Characters
+    Weapons
+    Monster-Types
+    Locations
+    
+WE:
+    Summoned Monsters
+    Boss Monsters
+    Unique Weapons
+    
+MV attr
+    Factions
+    
+Card
+    M:N
+    1:N - monster-dungeon
+    1:1 - city-jarl
+    1:1 or 1:N Conjuring
+    
+IC
+    Partial - weapons, city/guilds
+    Total - jarl/city, monsters/location
+    
+2att 1 row check: weapon worth and type
+1att  - city needs jarl
+
+for keys - loc and monsters
