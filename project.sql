@@ -1,10 +1,9 @@
 -- SPOOL skyrimdb.out
 -- SET ECHO ON
-DROP TABLE WeaponType CASCADE CONSTRAINTS;
-
 DROP TABLE Weapon CASCADE CONSTRAINTS;
+DROP TABLE WeaponType CASCADE CONSTRAINTS;
 DROP TABLE Enchantment CASCADE CONSTRAINTS;
-DROP TABLE NPC CASCADE CONSTRAINTS;
+DROP TABLE Character CASCADE CONSTRAINTS;
 DROP TABLE Quests CASCADE CONSTRAINTS;
 DROP TABLE Monster CASCADE CONSTRAINTS;
 DROP TABLE Locations CASCADE CONSTRAINTS;
@@ -43,15 +42,16 @@ CREATE TABLE Weapon (
 --
 --
 CREATE TABLE Enchantment (
-  wID             INTEGER PRIMARY KEY,
-  enchantmentName CHAR(40) NOT NULL,
+  wID             INTEGER,
+  enchantmentName CHAR(40),
   soulCharge      INTEGER  NOT NULL,
-  effect          CHAR(20) NOT NULL,
-  enchantValue    INTEGER  NOT NULL -- changed 'value' to 'enchantValue'
+  effect          CHAR(40) NOT NULL,
+  enchantValue    INTEGER  NOT NULL, -- changed 'value' to 'enchantValue'
+  PRIMARY KEY (wID, enchantmentName)
 );
 --
 --
-CREATE TABLE NPC (
+CREATE TABLE Character (
   refID      INTEGER PRIMARY KEY,
   essential  CHAR     NOT NULL,
   name       CHAR(20) NOT NULL,
@@ -86,7 +86,7 @@ CREATE TABLE NPC (
 --
 --
 CREATE TABLE Quests (
-  questName CHAR(20) PRIMARY KEY
+  questName CHAR(40) PRIMARY KEY
 );
 
 --
@@ -201,7 +201,7 @@ CREATE TABLE QuestLocated (
 
 -- foreign keys
 ALTER TABLE Weapon
-  ADD FOREIGN KEY (refID) REFERENCES NPC (refID)
+  ADD FOREIGN KEY (refID) REFERENCES Character (refID)
 DEFERRABLE INITIALLY DEFERRED;
 
 ALTER TABLE Weapon
@@ -212,12 +212,12 @@ ALTER TABLE Enchantment
   ADD FOREIGN KEY (wID) REFERENCES Weapon (wID)
 DEFERRABLE INITIALLY DEFERRED;
 
-ALTER TABLE NPC
+ALTER TABLE Character
   ADD FOREIGN KEY (locationID) REFERENCES Locations (locationID)
 DEFERRABLE INITIALLY DEFERRED;
 
 ALTER TABLE Monster
-  ADD FOREIGN KEY (refID) REFERENCES NPC (refID)
+  ADD FOREIGN KEY (refID) REFERENCES Character (refID)
 DEFERRABLE INITIALLY DEFERRED;
 
 ALTER TABLE Locations
@@ -225,7 +225,7 @@ ALTER TABLE Locations
 DEFERRABLE INITIALLY DEFERRED;
 
 ALTER TABLE Locations
-  ADD FOREIGN KEY (refID) REFERENCES NPC (refID)
+  ADD FOREIGN KEY (refID) REFERENCES Character (refID)
 DEFERRABLE INITIALLY DEFERRED;
 
 ALTER TABLE DamageMulti
@@ -233,24 +233,24 @@ ALTER TABLE DamageMulti
 DEFERRABLE INITIALLY DEFERRED;
 
 ALTER TABLE CharacterSkills
-  ADD FOREIGN KEY (refID) REFERENCES NPC (refID)
+  ADD FOREIGN KEY (refID) REFERENCES Character (refID)
 DEFERRABLE INITIALLY DEFERRED;
 
 ALTER TABLE CharacterMagic
-  ADD FOREIGN KEY (refID) REFERENCES NPC (refID)
+  ADD FOREIGN KEY (refID) REFERENCES Character (refID)
 DEFERRABLE INITIALLY DEFERRED;
 
 
 ALTER TABLE CharacterStats
-  ADD FOREIGN KEY (refID) REFERENCES NPC (refID)
+  ADD FOREIGN KEY (refID) REFERENCES Character (refID)
 DEFERRABLE INITIALLY DEFERRED;
 
 ALTER TABLE CharacterFaction
-  ADD FOREIGN KEY (refID) REFERENCES NPC (refID)
+  ADD FOREIGN KEY (refID) REFERENCES Character (refID)
 DEFERRABLE INITIALLY DEFERRED;
 
 ALTER TABLE QuestStarted
-  ADD FOREIGN KEY (refID) REFERENCES NPC (refID);
+  ADD FOREIGN KEY (refID) REFERENCES Character (refID);
 
 ALTER TABLE QuestLocated
   ADD FOREIGN KEY (locationID) REFERENCES Locations (locationID)
@@ -296,6 +296,41 @@ DEFERRABLE INITIALLY DEFERRED;
 -- Insert into Weapons values (14, 16, 1000, 19, ebony, mace);
 -- Insert into Weapons values (15, 16, 1750, 20, daedra heart, mace);
 -- Insert into Weapons values (16, 17, 2000, 24, dragonbone, mace);
+
+INSERT INTO WeaponType VALUES ('axe', 3, 4, 10, 'slashing', 'two-handed');
+INSERT INTO WeaponType VALUES ('bow', 3, 2, 4, 'piercing', 'two-handed');
+INSERT INTO WeaponType VALUES ('mace', 3, 3, 8, 'bludgeoning', 'one-handed');
+INSERT INTO WeaponType VALUES ('spork', 10, 0, 1, 'slashing', 'one-handed');
+INSERT INTO WeaponType VALUES ('dagger', 8, 0, 2, 'slashing', 'one-handed');
+INSERT INTO WeaponType VALUES ('sword', 5, 2, 5, 'slashing', 'one-handed');
+
+INSERT INTO Weapon VALUES (100, 10, 100, 5, NULL, 1, 'steel', 'dagger');
+INSERT INTO Weapon VALUES (200, 8, 80, 2, 5, NULL, 'wood', 'bow');
+INSERT INTO Weapon VALUES (300, 11, 190, 10, NULL, 3, 'iron', 'mace');
+INSERT INTO Weapon VALUES (400, 2, 20, 1, NULL, 4, 'iron', 'spork');
+INSERT INTO Weapon VALUES (500, 15, 500, 15, 6, NULL, 'glass', 'axe');
+INSERT INTO Weapon VALUES (600, 20, 750, 8, NULL, 2, 'steel', 'sword');
+INSERT INTO Weapon VALUES (700, 9, 160, 4, NULL, 5, 'steel', 'bow');
+
+INSERT INTO Quests VALUES ('A New Order');
+INSERT INTO Quests VALUES ('No Stone Unturned');
+INSERT INTO Quests VALUES ('Monty Python and the Holy Grail');
+INSERT INTO Quests VALUES ('Under New Management');
+INSERT INTO Quests VALUES ('Whodunit');
+INSERT INTO Quests VALUES ('Taking Care of Business');
+INSERT INTO Quests VALUES ('The Cure for Madness');
+
+INSERT INTO Character VALUES (1, 'n', 'DaggerMan', 'M', 'Khajiit','bandit', 10, 5);
+INSERT INTO Character VALUES (2, 'y', 'Link', 'M', 'Dunmer','player', 72, 1);
+INSERT INTO Character VALUES (3, 'n', 'MaceMan', 'M', 'Nord','fighter', 32, 4);
+INSERT INTO Character VALUES (4, 'n', 'SporkBoy', 'M', 'Altmer','civilian', 1, 2);
+INSERT INTO Character VALUES (5, 'n', 'Archer', 'M', 'Imperial','bandit', 32, 3);
+
+INSERT INTO Enchantment VALUES (100, 'Lunar', 17, 'Came from the Moon', 1000);
+INSERT INTO Enchantment VALUES (400, 'Unbending', 100, 'Will never bend', 800);
+INSERT INTO Enchantment VALUES (600, 'Master', 80, 'Allows for time travel', 2000);
+INSERT INTO Enchantment VALUES (700, 'Shocking', 32, 'Acts like a taser', 250);
+
 
 
 -- SET ECHO OFF
