@@ -2,20 +2,21 @@
 -- SET ECHO ON
 SET LINESIZE 1000
 
-DROP TABLE Weapon CASCADE CONSTRAINTS;
-DROP TABLE WeaponType CASCADE CONSTRAINTS;
-DROP TABLE Enchantment CASCADE CONSTRAINTS;
-DROP TABLE Character CASCADE CONSTRAINTS;
-DROP TABLE Quests CASCADE CONSTRAINTS;
-DROP TABLE Monster CASCADE CONSTRAINTS;
-DROP TABLE Locations CASCADE CONSTRAINTS;
-DROP TABLE DamageMulti CASCADE CONSTRAINTS;
 DROP TABLE CharacterSkills CASCADE CONSTRAINTS;
 DROP TABLE CharacterMagic CASCADE CONSTRAINTS;
 DROP TABLE CharacterStats CASCADE CONSTRAINTS;
 DROP TABLE CharacterFaction CASCADE CONSTRAINTS;
 DROP TABLE QuestStarted CASCADE CONSTRAINTS;
 DROP TABLE QuestLocated CASCADE CONSTRAINTS;
+DROP TABLE Weapon CASCADE CONSTRAINTS;
+DROP TABLE WeaponType CASCADE CONSTRAINTS;
+DROP TABLE Enchantment CASCADE CONSTRAINTS;
+DROP TABLE Character CASCADE CONSTRAINTS;
+DROP TABLE Quests CASCADE CONSTRAINTS;
+DROP TABLE DamageMulti CASCADE CONSTRAINTS;
+DROP TABLE Monster CASCADE CONSTRAINTS;
+DROP TABLE Locations CASCADE CONSTRAINTS;
+
 
 CREATE TABLE WeaponType (
   wName      CHAR(20),
@@ -226,104 +227,6 @@ CREATE TABLE QuestLocated (
   --   SKY_ql3: The quest name must be a valid quest
   CONSTRAINT SKY_ql3 FOREIGN KEY (questName) REFERENCES Quests (questName) DEFERRABLE INITIALLY DEFERRED
 );
-
--- -- foreign keys
--- ALTER TABLE Weapon
---   ADD FOREIGN KEY (refID) REFERENCES Character (refID)
--- DEFERRABLE INITIALLY DEFERRED;
---
--- ALTER TABLE Weapon
---   ADD FOREIGN KEY (wName) REFERENCES WeaponType (wName)
--- DEFERRABLE INITIALLY DEFERRED;
---
--- ALTER TABLE Enchantment
---   ADD FOREIGN KEY (wID) REFERENCES Weapon (wID)
--- DEFERRABLE INITIALLY DEFERRED;
---
--- ALTER TABLE Character
---   ADD FOREIGN KEY (locationID) REFERENCES Locations (locationID)
--- DEFERRABLE INITIALLY DEFERRED;
---
--- ALTER TABLE Monster
---   ADD FOREIGN KEY (refID) REFERENCES Character (refID)
--- DEFERRABLE INITIALLY DEFERRED;
---
--- ALTER TABLE Locations
---   ADD FOREIGN KEY (locatedIn) REFERENCES Locations (locationID)
--- DEFERRABLE INITIALLY DEFERRED;
---
--- ALTER TABLE Locations
---   ADD FOREIGN KEY (refID) REFERENCES Character (refID)
--- DEFERRABLE INITIALLY DEFERRED;
---
--- ALTER TABLE DamageMulti
---   ADD FOREIGN KEY (id) REFERENCES Monster (id)
--- DEFERRABLE INITIALLY DEFERRED;
---
--- ALTER TABLE CharacterSkills
---   ADD FOREIGN KEY (refID) REFERENCES Character (refID)
--- DEFERRABLE INITIALLY DEFERRED;
---
--- ALTER TABLE CharacterMagic
---   ADD FOREIGN KEY (refID) REFERENCES Character (refID)
--- DEFERRABLE INITIALLY DEFERRED;
---
---
--- ALTER TABLE CharacterStats
---   ADD FOREIGN KEY (refID) REFERENCES Character (refID)
--- DEFERRABLE INITIALLY DEFERRED;
---
--- ALTER TABLE CharacterFaction
---   ADD FOREIGN KEY (refID) REFERENCES Character (refID)
--- DEFERRABLE INITIALLY DEFERRED;
---
--- ALTER TABLE QuestStarted
---   ADD FOREIGN KEY (refID) REFERENCES Character (refID);
---
--- ALTER TABLE QuestLocated
---   ADD FOREIGN KEY (locationID) REFERENCES Locations (locationID)
--- DEFERRABLE INITIALLY DEFERRED;
-
--- end of foreign keys
-
-
---
---------------------------------------------------------------------------------------------------------------
---Populate the database
---------------------------------------------------------------------------------------------------------------
---
--- ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD';
---
---
--- COMMENTING ALL OF THESE OUT FOR NOW: ALL TYPES MUST BE STRINGS
--- Insert into WeaponType values ('Dagger', 10, 1, 2, slashing, one-handed);
--- Insert into WeaponType values ('Mace', 5, 2, 3, bludgeoning, one-handed);
--- Insert into WeaponType values ('Sword', 8, 3, 4, piercing, one-handed);
--- Insert into WeaponType values ('War Axe', 7, 5, 5, slashing, one-handed);
--- Insert into WeaponType values ('BattleAxe', 4, 7, 7, slashing, two-handed);
--- Insert into WeaponType values ('Greatsword', 3, 8, 7, piercing, two-handed);
--- Insert into WeaponType values ('Warhammer', 2, 10, 9, bludgeoning, two-handed);
--- Insert into WeaponType values ('Bow', 1, 1, 5, piercing, two-handed);
--- Insert into WeaponType values ('Crossbow', 5, 1, 2, piercing, two-handed);
---
--- Insert into Weapons values (1, 4, 10, 2, iron, dagger);
--- Insert into Weapons values (2, 5, 18, 3, steel, dagger);
--- Insert into Weapons values (3, 6, 30, 3, orchalcum, dagger);
--- Insert into Weapons values (4, 6, 95, 4, moonstone, dagger);
--- Insert into Weapons values (5, 9, 165, 5, glass, dagger);
--- Insert into Weapons values (6, 10, 290, 5, ebony, dagger);
--- Insert into Weapons values (7, 11, 500, 6, daedra heart, dagger);
--- Insert into Weapons values (8, 12, 600, 7, dragonbone, dagger);
---
---
--- Insert into Weapons values (9, 9, 35, 13, iron, mace);
--- Insert into Weapons values (10, 10, 65, 14, steel, mace);
--- Insert into Weapons values (11, 11, 105, 15, orchalcum, mace);
--- Insert into Weapons values (12, 14, 330, 17, moonstone, mace);
--- Insert into Weapons values (13, 14, 575, 18, glass, mace);
--- Insert into Weapons values (14, 16, 1000, 19, ebony, mace);
--- Insert into Weapons values (15, 16, 1750, 20, daedra heart, mace);
--- Insert into Weapons values (16, 17, 2000, 24, dragonbone, mace);
 -- SET FEEDBACK OFF
 --------------------------------------------
 INSERT INTO WeaponType VALUES ('axe', 3, 4, 10, 'slashing', 'two-handed');
