@@ -1,0 +1,30 @@
+SET ECHO ON
+SELECT *
+FROM WeaponType;
+SELECT *
+FROM Weapon;
+SELECT *
+FROM Enchantment;
+SELECT *
+FROM Character;
+SELECT *
+FROM Quests;
+SELECT *
+FROM Monster;
+SELECT *
+FROM Locations;
+SELECT *
+FROM DamageMulti;
+SELECT *
+FROM CharacterSkills;
+SELECT *
+FROM CharacterMagic;
+SELECT *
+FROM CharacterStats;
+SELECT *
+FROM CharacterFaction;
+SELECT *
+FROM QuestStarted;
+SELECT *
+FROM QuestLocated;
+SET ECHO OFF
