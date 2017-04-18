@@ -2,21 +2,20 @@
 -- SET ECHO ON
 SET LINESIZE 1000
 
+DROP TABLE Weapon CASCADE CONSTRAINTS;
+DROP TABLE WeaponType CASCADE CONSTRAINTS;
+DROP TABLE Enchantment CASCADE CONSTRAINTS;
+DROP TABLE NPC CASCADE CONSTRAINTS;
+DROP TABLE Quests CASCADE CONSTRAINTS;
+DROP TABLE Monster CASCADE CONSTRAINTS;
+DROP TABLE Locations CASCADE CONSTRAINTS;
+DROP TABLE DamageMulti CASCADE CONSTRAINTS;
 DROP TABLE CharacterSkills CASCADE CONSTRAINTS;
 DROP TABLE CharacterMagic CASCADE CONSTRAINTS;
 DROP TABLE CharacterStats CASCADE CONSTRAINTS;
 DROP TABLE CharacterFaction CASCADE CONSTRAINTS;
 DROP TABLE QuestStarted CASCADE CONSTRAINTS;
 DROP TABLE QuestLocated CASCADE CONSTRAINTS;
-DROP TABLE Weapon CASCADE CONSTRAINTS;
-DROP TABLE WeaponType CASCADE CONSTRAINTS;
-DROP TABLE Enchantment CASCADE CONSTRAINTS;
-DROP TABLE Character CASCADE CONSTRAINTS;
-DROP TABLE Quests CASCADE CONSTRAINTS;
-DROP TABLE DamageMulti CASCADE CONSTRAINTS;
-DROP TABLE Monster CASCADE CONSTRAINTS;
-DROP TABLE Locations CASCADE CONSTRAINTS;
-
 
 CREATE TABLE WeaponType (
   wName      CHAR(20),
@@ -34,24 +33,28 @@ CREATE TABLE Locations (
   locationID INTEGER,
   weather    CHAR(20) NOT NULL,
   locType    CHAR(20) NOT NULL,
-  refID      INTEGER  NOT NULL,
+  refID      INTEGER,
   locatedIn  INTEGER,
   -- SKY_l2: each location ID must be unique
   CONSTRAINT SKY_l1 PRIMARY KEY (locationID),
   --   SKY_l2: if a location is located somewhere, it must be located in a real location.
-  CONSTRAINT SKY_l2 FOREIGN KEY (locatedIn) REFERENCES Locations (locationID) DEFERRABLE INITIALLY DEFERRED
+  CONSTRAINT SKY_l2 FOREIGN KEY (locatedIn) REFERENCES Locations (locationID)
+DEFERRABLE INITIALLY DEFERRED
+--SKY_l3: RefID: The ruler of a location needs to be a valid NPC
+-- CONSTRAINT SKY_l3 FOREIGN KEY (refID) REFERENCES NPC(refID)
+-- DEFERRABLE INITIALLY DEFERRED
 );
 
 --
 --
-CREATE TABLE Character (
+CREATE TABLE NPC (
   refID      INTEGER,
   essential  CHAR     NOT NULL,
   name       CHAR(20) NOT NULL,
   gender     CHAR     NOT NULL,
   race       CHAR(20) NOT NULL,
-  charClass  CHAR(20) NOT NULL, --changed 'class' to 'charClass'
-  charLevel  INTEGER  NOT NULL, -- changed 'level' to 'charLevel'
+  charClass  CHAR(20) NOT NULL,
+  charLevel  INTEGER  NOT NULL,
   locationID INTEGER,
   --   SKY_c1: All characters have a unique refID.
   CONSTRAINT SKY_c1 PRIMARY KEY (refID),
@@ -72,7 +75,7 @@ CREATE TABLE Character (
 CREATE TABLE Weapon (
   wID        INTEGER,
   attack     INTEGER  NOT NULL,
-  wepValue   INTEGER  NOT NULL, -- changed 'value' to 'wepValue'
+  wepValue   INTEGER  NOT NULL,
   weight     INTEGER  NOT NULL,
   locationID INTEGER,
   refID      INTEGER,
@@ -83,7 +86,7 @@ CREATE TABLE Weapon (
   --SKY_w2: The potential locationID of the weapon must be a valid location
   CONSTRAINT SKY_w2 FOREIGN KEY (locationID) REFERENCES Locations (locationID) DEFERRABLE INITIALLY DEFERRED,
   --SKY_w3: The potential character who owns the weapon must be a valid character
-  CONSTRAINT SKY_w3 FOREIGN KEY (refID) REFERENCES Character (refID) DEFERRABLE INITIALLY DEFERRED,
+  CONSTRAINT SKY_w3 FOREIGN KEY (refID) REFERENCES NPC (refID) DEFERRABLE INITIALLY DEFERRED,
   --SKY_w4: The name of what type of weapon it is must be a valid WeaponType
   CONSTRAINT SKY_w4 FOREIGN KEY (wName) REFERENCES WeaponType (wName) DEFERRABLE INITIALLY DEFERRED,
   --SKY_w5: This constraint makes sure that a weapon is either in an inventory or in a location.
@@ -118,10 +121,10 @@ CREATE TABLE Quests (
 CREATE TABLE Monster (
   id           INTEGER,
   health       INTEGER  NOT NULL,
-  monsterLevel INTEGER  NOT NULL, -- changed 'level' to 'monsterLevel'
+  monsterLevel INTEGER  NOT NULL,
   loot         INTEGER,
   locationID   INTEGER  NOT NULL,
-  monsterType  CHAR(20) NOT NULL, -- changed 'type' to 'monsterType'
+  monsterType  CHAR(20) NOT NULL,
   bounty       INTEGER,
   soulSize     INTEGER  NOT NULL,
   refID        INTEGER,
@@ -144,7 +147,7 @@ CREATE TABLE Monster (
   --   SKY_m6: the location that the monster is at must exist
   CONSTRAINT SKY_m6 FOREIGN KEY (locationID) REFERENCES Locations (locationID) DEFERRABLE INITIALLY DEFERRED,
   --   SKY_m7: potential the summoner's refID must exist
-  CONSTRAINT SKY_m7 FOREIGN KEY (refID) REFERENCES Character (refID) DEFERRABLE INITIALLY DEFERRED
+  CONSTRAINT SKY_m7 FOREIGN KEY (refID) REFERENCES NPC (refID) DEFERRABLE INITIALLY DEFERRED
 );
 --
 --
@@ -165,7 +168,7 @@ CREATE TABLE CharacterSkills (
   --SKY_csk1: The refID and skills pair must be unique
   CONSTRAINT SKY_csk1 PRIMARY KEY (refID, skills),
   --SKY_csk2: The refID must be a valid refID
-  CONSTRAINT SKY_csk2 FOREIGN KEY (refID) REFERENCES Character (refID) DEFERRABLE INITIALLY DEFERRED,
+  CONSTRAINT SKY_csk2 FOREIGN KEY (refID) REFERENCES NPC (refID) DEFERRABLE INITIALLY DEFERRED,
   --SKY_csk3: The character can only have these skills: 'Armor','Stealing', 'Crafting', or 'Swordsmanship'.
   CONSTRAINT SKY_csk3 CHECK (skills IN ('Armor', 'Stealing', 'Crafting', 'Swordsmanship'))
 );
@@ -177,7 +180,7 @@ CREATE TABLE CharacterMagic (
   --SKY_cmg1: The refID and magic pair must be unique
   CONSTRAINT SKY_cmg1 PRIMARY KEY (refID, magic),
   --SKY_cmg2: The refID must be a valid refID
-  CONSTRAINT SKY_cmg2 FOREIGN KEY (refID) REFERENCES Character (refID) DEFERRABLE INITIALLY DEFERRED,
+  CONSTRAINT SKY_cmg2 FOREIGN KEY (refID) REFERENCES NPC (refID) DEFERRABLE INITIALLY DEFERRED,
   --   SKY_cmg3 checks to make sure the character's magic skill is one of the following strings in the list.
   CONSTRAINT SKY_cmg3 CHECK (magic IN ('Alteration', 'Conjuration', 'Destruction', 'Illusion', 'Restoration'))
 );
@@ -189,7 +192,7 @@ CREATE TABLE CharacterStats (
   --SKY_cstat1: The refID and stats pair must be unique
   CONSTRAINT SKY_cstat1 PRIMARY KEY (refID, stats),
   --SKY_cstat2: The refID must be a valid refID
-  CONSTRAINT SKY_cstat2 FOREIGN KEY (refID) REFERENCES Character (refID) DEFERRABLE INITIALLY DEFERRED
+  CONSTRAINT SKY_cstat2 FOREIGN KEY (refID) REFERENCES NPC (refID) DEFERRABLE INITIALLY DEFERRED
 );
 --
 --
@@ -199,14 +202,14 @@ CREATE TABLE CharacterFaction (
   --SKY_cf1: The refID and magit=c pair must be unique
   CONSTRAINT SKY_cf1 PRIMARY KEY (refID, faction),
   --SKY_cf2: The refID must be a valid refID
-  CONSTRAINT SKY_cf2 FOREIGN KEY (refID) REFERENCES Character (refID) DEFERRABLE INITIALLY DEFERRED,
+  CONSTRAINT SKY_cf2 FOREIGN KEY (refID) REFERENCES NPC (refID) DEFERRABLE INITIALLY DEFERRED,
   --   SKY_cf3: The character can only be apart of the following factions:
   CONSTRAINT SKY_cf3 CHECK (faction IN ('Bards College', 'Greybeards'))
 );
 --
 --
 CREATE TABLE QuestStarted (
-  questName   CHAR(20),
+  questName   CHAR(40),
   refID       INTEGER,
   timeStarted INTEGER NOT NULL,
   --   SKY_qs1: The questname and the refID must be a unique pair
@@ -214,7 +217,7 @@ CREATE TABLE QuestStarted (
   --   SKY_qs2: The questName must be a valid name for a Quest
   CONSTRAINT SKY_qs2 FOREIGN KEY (questName) REFERENCES Quests (questName) DEFERRABLE INITIALLY DEFERRED,
   --   SKY_qs3: The refID must be a valid Character
-  CONSTRAINT SKY_qs3 FOREIGN KEY (refID) REFERENCES Character (refID) DEFERRABLE INITIALLY DEFERRED
+  CONSTRAINT SKY_qs3 FOREIGN KEY (refID) REFERENCES NPC (refID) DEFERRABLE INITIALLY DEFERRED
 );
 
 CREATE TABLE QuestLocated (
@@ -227,7 +230,110 @@ CREATE TABLE QuestLocated (
   --   SKY_ql3: The quest name must be a valid quest
   CONSTRAINT SKY_ql3 FOREIGN KEY (questName) REFERENCES Quests (questName) DEFERRABLE INITIALLY DEFERRED
 );
+
+-- -- foreign keys
+-- ALTER TABLE Weapon
+--   ADD FOREIGN KEY (refID) REFERENCES NPC (refID)
+-- DEFERRABLE INITIALLY DEFERRED;
+--
+-- ALTER TABLE Weapon
+--   ADD FOREIGN KEY (wName) REFERENCES WeaponType (wName)
+-- DEFERRABLE INITIALLY DEFERRED;
+--
+-- ALTER TABLE Enchantment
+--   ADD FOREIGN KEY (wID) REFERENCES Weapon (wID)
+-- DEFERRABLE INITIALLY DEFERRED;
+--
+-- ALTER TABLE NPC
+--   ADD FOREIGN KEY (locationID) REFERENCES Locations (locationID)
+-- DEFERRABLE INITIALLY DEFERRED;
+--
+-- ALTER TABLE Monster
+--   ADD FOREIGN KEY (refID) REFERENCES NPC (refID)
+-- DEFERRABLE INITIALLY DEFERRED;
+--
+-- ALTER TABLE Locations
+--   ADD FOREIGN KEY (locatedIn) REFERENCES Locations (locationID)
+-- DEFERRABLE INITIALLY DEFERRED;
+--
+-- ALTER TABLE Locations
+--   ADD FOREIGN KEY (refID) REFERENCES NPC (refID)
+-- DEFERRABLE INITIALLY DEFERRED;
+--
+-- ALTER TABLE DamageMulti
+--   ADD FOREIGN KEY (id) REFERENCES Monster (id)
+-- DEFERRABLE INITIALLY DEFERRED;
+--
+-- ALTER TABLE CharacterSkills
+--   ADD FOREIGN KEY (refID) REFERENCES NPC (refID)
+-- DEFERRABLE INITIALLY DEFERRED;
+--
+-- ALTER TABLE CharacterMagic
+--   ADD FOREIGN KEY (refID) REFERENCES NPC (refID)
+-- DEFERRABLE INITIALLY DEFERRED;
+--
+--
+-- ALTER TABLE CharacterStats
+--   ADD FOREIGN KEY (refID) REFERENCES NPC (refID)
+-- DEFERRABLE INITIALLY DEFERRED;
+--
+-- ALTER TABLE CharacterFaction
+--   ADD FOREIGN KEY (refID) REFERENCES NPC (refID)
+-- DEFERRABLE INITIALLY DEFERRED;
+--
+-- ALTER TABLE QuestStarted
+--   ADD FOREIGN KEY (refID) REFERENCES NPC (refID);
+--
+-- ALTER TABLE QuestLocated
+--   ADD FOREIGN KEY (locationID) REFERENCES Locations (locationID)
+-- DEFERRABLE INITIALLY DEFERRED;
+
+-- end of foreign keys
+
+
+--
+--------------------------------------------------------------------------------------------------------------
+--Populate the database
+--------------------------------------------------------------------------------------------------------------
+--
+-- ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD';
+--
+--
+-- COMMENTING ALL OF THESE OUT FOR NOW: ALL TYPES MUST BE STRINGS
+-- Insert into WeaponType values ('Dagger', 10, 1, 2, slashing, one-handed);
+-- Insert into WeaponType values ('Mace', 5, 2, 3, bludgeoning, one-handed);
+-- Insert into WeaponType values ('Sword', 8, 3, 4, piercing, one-handed);
+-- Insert into WeaponType values ('War Axe', 7, 5, 5, slashing, one-handed);
+-- Insert into WeaponType values ('BattleAxe', 4, 7, 7, slashing, two-handed);
+-- Insert into WeaponType values ('Greatsword', 3, 8, 7, piercing, two-handed);
+-- Insert into WeaponType values ('Warhammer', 2, 10, 9, bludgeoning, two-handed);
+-- Insert into WeaponType values ('Bow', 1, 1, 5, piercing, two-handed);
+-- Insert into WeaponType values ('Crossbow', 5, 1, 2, piercing, two-handed);
+--
+-- Insert into Weapons values (1, 4, 10, 2, iron, dagger);
+-- Insert into Weapons values (2, 5, 18, 3, steel, dagger);
+-- Insert into Weapons values (3, 6, 30, 3, orchalcum, dagger);
+-- Insert into Weapons values (4, 6, 95, 4, moonstone, dagger);
+-- Insert into Weapons values (5, 9, 165, 5, glass, dagger);
+-- Insert into Weapons values (6, 10, 290, 5, ebony, dagger);
+-- Insert into Weapons values (7, 11, 500, 6, daedra heart, dagger);
+-- Insert into Weapons values (8, 12, 600, 7, dragonbone, dagger);
+--
+--
+-- Insert into Weapons values (9, 9, 35, 13, iron, mace);
+-- Insert into Weapons values (10, 10, 65, 14, steel, mace);
+-- Insert into Weapons values (11, 11, 105, 15, orchalcum, mace);
+-- Insert into Weapons values (12, 14, 330, 17, moonstone, mace);
+-- Insert into Weapons values (13, 14, 575, 18, glass, mace);
+-- Insert into Weapons values (14, 16, 1000, 19, ebony, mace);
+-- Insert into Weapons values (15, 16, 1750, 20, daedra heart, mace);
+-- Insert into Weapons values (16, 17, 2000, 24, dragonbone, mace);
 -- SET FEEDBACK OFF
+--------------------------------------------
+INSERT INTO Locations VALUES(1, 'Cloudy', 'Plains', NULL, NULL);
+INSERT INTO Locations VALUES(2, 'Stormy', 'City', 4, 1);
+INSERT INTO Locations VALUES(3, 'Indoors', 'House', 2, 2);
+INSERT INTO Locations VALUES(4, 'Frogs', 'Guild', 1, 2);
 --------------------------------------------
 INSERT INTO WeaponType VALUES ('axe', 3, 4, 10, 'slashing', 'two-handed');
 INSERT INTO WeaponType VALUES ('bow', 3, 2, 4, 'piercing', 'two-handed');
@@ -252,17 +358,29 @@ INSERT INTO Quests VALUES ('Whodunit');
 INSERT INTO Quests VALUES ('Taking Care of Business');
 INSERT INTO Quests VALUES ('The Cure for Madness');
 --------------------------------------------
-INSERT INTO Character VALUES (1, 'n', 'DaggerMan', 'M', 'Khajiit', 'bandit', 10, 5);
-INSERT INTO Character VALUES (2, 'y', 'Link', 'M', 'Dunmer', 'player', 72, 1);
-INSERT INTO Character VALUES (3, 'n', 'MaceMan', 'M', 'Nord', 'fighter', 32, 4);
-INSERT INTO Character VALUES (4, 'n', 'SporkBoy', 'M', 'Altmer', 'civilian', 1, 2);
-INSERT INTO Character VALUES (5, 'n', 'Archer', 'M', 'Imperial', 'bandit', 32, 3);
+INSERT INTO NPC VALUES (1, 'n', 'DaggerMan', 'M', 'Khajiit', 'bandit', 10, 5);
+INSERT INTO NPC VALUES (2, 'y', 'Link', 'M', 'Dunmer', 'player', 72, 1);
+INSERT INTO NPC VALUES (3, 'n', 'MaceMan', 'M', 'Nord', 'fighter', 32, 4);
+INSERT INTO NPC VALUES (4, 'n', 'SporkBoy', 'M', 'Altmer', 'civilian', 1, 2);
+INSERT INTO NPC VALUES (5, 'n', 'Archer', 'M', 'Imperial', 'bandit', 32, 3);
+INSERT INTO NPC VALUES (6, 'n', 'BowMan', 'F', 'Imperial', 'fighter', 32, 3);
 --------------------------------------------
 INSERT INTO Enchantment VALUES (100, 'Lunar', 17, 'Came from the Moon', 1000);
 INSERT INTO Enchantment VALUES (400, 'Unbending', 100, 'Will never bend', 800);
 INSERT INTO Enchantment VALUES (600, 'Master', 80, 'Allows for time travel', 2000);
 INSERT INTO Enchantment VALUES (700, 'Shocking', 32, 'Acts like a taser', 250);
 --------------------------------------------
+INSERT INTO QuestStarted VALUES ('A New Order', 1, 1200);
+INSERT INTO QuestStarted VALUES ('No Stone Unturned', 1, 1300);
+INSERT INTO QuestStarted VALUES ('Monty Python and the Holy Grail', 1, 1400);
+INSERT INTO QuestStarted VALUES ('Under New Management', 1, 1500);
+INSERT INTO QuestStarted VALUES ('Whodunit', 1, 1600);
+INSERT INTO QuestStarted VALUES ('Taking Care of Business', 1, 1700);
+INSERT INTO QuestStarted VALUES ('The Cure for Madness', 1, 1800);
+INSERT INTO QuestStarted VALUES ('Whodunit', 2, 0100);
+INSERT INTO QuestStarted VALUES ('Whodunit', 4, 0550);
+INSERT INTO QuestStarted VALUES ('Whodunit', 6, 1900);
+
 -- SET FEEDBACK ON
 -- COMMIT;
 --------------------------------------------
@@ -276,7 +394,7 @@ FROM Weapon;
 SELECT *
 FROM Enchantment;
 SELECT *
-FROM Character;
+FROM NPC;
 SELECT *
 FROM Quests;
 SELECT *
@@ -325,13 +443,103 @@ queries.
 11. A Top-N query.
  */
 /*
+Q10 - Joining 4 tables
+The damage type of the weapon owned by male NPCs that rule locations.
+*/
+SELECT C.name, W.wName, T.damageType
+FROM NPC C, LocationS L, Weapon W, WeaponType T
+WHERE L.refID = C.refID AND
+	C.gender = 'M' AND
+C.refID = W.refID AND
+W.wName = T.wName;
+/*
+Q20 - Self-Join query
+Show NPCs that are of the same race and do not have the same class.
+*/
+SELECT C1.refID, C1.race, C1.charClass, C2.refID, C2.race, C2.charClass
+FROM NPC C1, NPC C2
+WHERE C1.race = C2.race AND
+C1.charClass != C2.charClass;
+/*
+Q30 - MINUS query
+Find the monsters above level 50 and are not in the location "Plains".
+*/
+SELECT M.id, M.monsterLevel, M.locationID
+FROM Monster M
+WHERE M.monsterLevel > 50
+MINUS
+SELECT M.id, M.monsterLevel, M.locationID
+FROM Monster M, Locations L
+WHERE M.locationID = L.locationID;
+
+/*
+Q070 A Non-correlated subquery
+
+*/
+
+/*
+Q 080 A relational DIVISION query.
+Finds all NPCs who have started every quest
+ */
+SELECT
+  C1.refID,
+  C1.name
+FROM NPC C1
+WHERE NOT EXISTS((SELECT Q.questName
+                  FROM Quests Q) MINUS
+                 (SELECT QS.questName
+                  FROM QuestStarted QS
+                  WHERE QS.refID = C1.refID));
+
+/*
+Q090 - Outer join query
+  Finds all NPCs who have a weapon that isn't a bow
+ */
+SELECT C1.refID, C1.name, W.wID, W.wName, W.refID
+FROM NPC C1 LEFT OUTER JOIN Weapon W ON C1.refID=W.refID AND W.wName != 'bow';
+
+/*
+Q100 - RANK query
+Checks to see what rank a weapon with a value of 500 will be  - values in descending order
+ */
+SELECT RANK (500) WITHIN GROUP
+       (ORDER BY wepValue DESC) "Rank of wepValue"
+FROM Weapon;
+
+/*
+Q110: Top-N query
+Checks to see what the 2 most valuable enchantments are
+ */
+SELECT enchantmentName, enchantValue, effect
+  FROM (SELECT DISTINCT enchantmentName, effect, enchantValue FROM Enchantment ORDER BY enchantValue DESC)
+WHERE ROWNUM < 3;
+
+/*
+Q120: GROUP BY, HAVING, and ORDER BY
+Checks for all weapons with more than one type
+*/
+SELECT w.wname, count(*)
+FROM weapon w, weapontype t
+where t.wname = w.wname
+GROUP BY w.wname HAVING count(*) > 1;
+
+/*
+Q130: Average
+Averages the weapon damage
+*/
+SELECT MAX(Attack) AS maxAttack, MIN(Attack) as minAttack, AVG(Attack) as avgAttack
+FROM weapon;
+/*
 Testing of the four ICs that are listed in the final documentation
 Via the specs for the project:
 
 Include the following items for every IC that you test (Important: see the next section titled
 “Submit a final report” regarding which ICs to test).
- A comment line stating: Testing: < IC name>
- A SQL INSERT, DELETE, or UPDATE that will test the IC.
+A comment line stating: Testing: < IC name>
+A SQL INSERT, DELETE, or UPDATE that will test the IC.
  */
 -- SET ECHO OFF
 -- SPOOL OFF
+
+
+
