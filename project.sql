@@ -64,6 +64,7 @@ CREATE TABLE NPC (
   CONSTRAINT SKY_c3 CHECK (charClass IN ('player', 'merchant', 'bandit', 'mage', 'fighter', 'civilian')),
   --   SKY_c4: The character level has to be greater than 0, but less than 101.
   CONSTRAINT SKY_c4 CHECK (NOT (charLevel < 1 AND charLevel > 100)),
+
   --   SKY_c5: The character race has to be 'Altmer', 'Argonian', 'Bosmer', 'Breton', 'Dunmer', 'Imperial', 'Khajiit', 'Nord', 'Orsimer', or 'Redguard'.
   CONSTRAINT SKY_c5 CHECK (race IN
                            ('Altmer', 'Argonian', 'Bosmer', 'Breton', 'Dunmer', 'Imperial', 'Khajiit', 'Nord', 'Orsimer', 'Redguard')),
@@ -165,6 +166,7 @@ CREATE TABLE DamageMulti (
 CREATE TABLE CharacterSkills (
   refID  INTEGER,
   skills CHAR(20) NOT NULL,
+
   --SKY_csk1: The refID and skills pair must be unique
   CONSTRAINT SKY_csk1 PRIMARY KEY (refID, skills),
   --SKY_csk2: The refID must be a valid refID
@@ -334,6 +336,8 @@ INSERT INTO Locations VALUES(1, 'Cloudy', 'Plains', NULL, NULL);
 INSERT INTO Locations VALUES(2, 'Stormy', 'City', 4, 1);
 INSERT INTO Locations VALUES(3, 'Indoors', 'House', 2, 2);
 INSERT INTO Locations VALUES(4, 'Frogs', 'Guild', 1, 2);
+INSERT INTO Locations VALUES(5, 'Snowy', 'Mountains', 3, 1);
+INSERT INTO Locations VALUES(6, 'Foggy', 'Swamp', 2, 2);
 --------------------------------------------
 INSERT INTO WeaponType VALUES ('axe', 3, 4, 10, 'slashing', 'two-handed');
 INSERT INTO WeaponType VALUES ('bow', 3, 2, 4, 'piercing', 'two-handed');
@@ -420,30 +424,36 @@ SQL queries go there along with the query number and the features that it demons
 Via the specs for the project:
 
 1. A comment line stating the query number and the feature(s) it demonstrates
+
 (e.g. – Q25 – correlated subquery).
 2. A comment line stating the query in English.
 3. The SQL code for the query.
  */
 /*
+
 REMOVE THIS BEFORE SUBMITTING - FOR REFERENCE ONLY
 
 At a minimum, your queries must demonstrate the features listed below. You may of course demonstrate
 more than one feature in any one query and thus end up having to write fewer, but more interesting,
+
 queries.
 1. A join involving at least four relations.
 2. A self-join.
 3. UNION, INTERSECT, and/or MINUS.
 4. SUM, AVG, MAX, and/or MIN.
+
 5. GROUP BY, HAVING, and ORDER BY, all appearing in the same query
 6. A correlated subquery.
 7. A non-correlated subquery.
 8. A relational DIVISION query.
 9. An outer join query.
+
 10. A RANK query.
 11. A Top-N query.
  */
 /*
 Q10 - Joining 4 tables
+
 The damage type of the weapon owned by male NPCs that rule locations.
 */
 SELECT C.name, W.wName, T.damageType
@@ -454,6 +464,7 @@ C.refID = W.refID AND
 W.wName = T.wName;
 /*
 Q20 - Self-Join query
+
 Show NPCs that are of the same race and do not have the same class.
 */
 SELECT C1.refID, C1.race, C1.charClass, C2.refID, C2.race, C2.charClass
@@ -463,6 +474,7 @@ C1.charClass != C2.charClass;
 /*
 Q30 - MINUS query
 Find the monsters above level 50 and are not in the location "Plains".
+
 */
 SELECT M.id, M.monsterLevel, M.locationID
 FROM Monster M
@@ -473,11 +485,13 @@ FROM Monster M, Locations L
 WHERE M.locationID = L.locationID;
 
 /*
+
 Q070 A Non-correlated subquery
 
 */
 
 /*
+
 Q 080 A relational DIVISION query.
 Finds all NPCs who have started every quest
  */
@@ -493,6 +507,7 @@ WHERE NOT EXISTS((SELECT Q.questName
 
 /*
 Q090 - Outer join query
+
   Finds all NPCs who have a weapon that isn't a bow
  */
 SELECT C1.refID, C1.name, W.wID, W.wName, W.refID
@@ -507,6 +522,7 @@ SELECT RANK (500) WITHIN GROUP
 FROM Weapon;
 
 /*
+
 Q110: Top-N query
 Checks to see what the 2 most valuable enchantments are
  */
@@ -517,6 +533,7 @@ WHERE ROWNUM < 3;
 /*
 Q120: GROUP BY, HAVING, and ORDER BY
 Checks for all weapons with more than one type
+
 */
 SELECT w.wname, count(*)
 FROM weapon w, weapontype t
@@ -530,6 +547,17 @@ Averages the weapon damage
 SELECT MAX(Attack) AS maxAttack, MIN(Attack) as minAttack, AVG(Attack) as avgAttack
 FROM weapon;
 /*
+
+/*
+Q140: Correlated Sub-Query
+Finds all weapons in a location.
+*/
+select w.wid 
+from weapon w
+where w.attack > 5 and exists 
+(select * from locations l where w.locationid = l.locationid);
+
+/*
 Testing of the four ICs that are listed in the final documentation
 Via the specs for the project:
 
@@ -537,9 +565,10 @@ Include the following items for every IC that you test (Important: see the next 
 “Submit a final report” regarding which ICs to test).
 A comment line stating: Testing: < IC name>
 A SQL INSERT, DELETE, or UPDATE that will test the IC.
- */
+*/
 -- SET ECHO OFF
 -- SPOOL OFF
+
 
 
 
