@@ -64,7 +64,6 @@ CREATE TABLE NPC (
   CONSTRAINT SKY_c3 CHECK (charClass IN ('player', 'merchant', 'bandit', 'mage', 'fighter', 'civilian')),
   --   SKY_c4: The character level has to be greater than 0, but less than 101.
   CONSTRAINT SKY_c4 CHECK (NOT (charLevel < 1 AND charLevel > 100)),
-
   --   SKY_c5: The character race has to be 'Altmer', 'Argonian', 'Bosmer', 'Breton', 'Dunmer', 'Imperial', 'Khajiit', 'Nord', 'Orsimer', or 'Redguard'.
   CONSTRAINT SKY_c5 CHECK (race IN
                            ('Altmer', 'Argonian', 'Bosmer', 'Breton', 'Dunmer', 'Imperial', 'Khajiit', 'Nord', 'Orsimer', 'Redguard')),
@@ -166,7 +165,6 @@ CREATE TABLE DamageMulti (
 CREATE TABLE CharacterSkills (
   refID  INTEGER,
   skills CHAR(20) NOT NULL,
-
   --SKY_csk1: The refID and skills pair must be unique
   CONSTRAINT SKY_csk1 PRIMARY KEY (refID, skills),
   --SKY_csk2: The refID must be a valid refID
@@ -368,6 +366,7 @@ INSERT INTO NPC VALUES (3, 'n', 'MaceMan', 'M', 'Nord', 'fighter', 32, 4);
 INSERT INTO NPC VALUES (4, 'n', 'SporkBoy', 'M', 'Altmer', 'civilian', 1, 2);
 INSERT INTO NPC VALUES (5, 'n', 'Archer', 'M', 'Imperial', 'bandit', 32, 3);
 INSERT INTO NPC VALUES (6, 'n', 'BowMan', 'F', 'Imperial', 'fighter', 32, 3);
+INSERT INTO NPC VALUES (7, 'n', 'Charles', 'F', 'Imperial', 'bandit', 4, 5);
 --------------------------------------------
 INSERT INTO Enchantment VALUES (100, 'Lunar', 17, 'Came from the Moon', 1000);
 INSERT INTO Enchantment VALUES (400, 'Unbending', 100, 'Will never bend', 800);
@@ -384,6 +383,43 @@ INSERT INTO QuestStarted VALUES ('The Cure for Madness', 1, 1800);
 INSERT INTO QuestStarted VALUES ('Whodunit', 2, 0100);
 INSERT INTO QuestStarted VALUES ('Whodunit', 4, 0550);
 INSERT INTO QuestStarted VALUES ('Whodunit', 6, 1900);
+--------------------------------------------
+INSERT INTO QuestLocated VALUES (1, 'A New Order');
+INSERT INTO QuestLocated VALUES (2, 'No Stone Unturned');
+INSERT INTO QuestLocated VALUES (3, 'Monty Python and the Holy Grail');
+INSERT INTO QuestLocated VALUES (4, 'Under New Management');
+INSERT INTO QuestLocated VALUES (1, 'Whodunit');
+INSERT INTO QuestLocated VALUES (5, 'Taking Care of Business');
+INSERT INTO QuestLocated VALUES (1, 'The Cure for Madness');
+--------------------------------------------
+INSERT INTO CharacterFaction VALUES (1, 'Bards College');
+INSERT INTO CharacterFaction VALUES (2, 'Greybeards');
+INSERT INTO CharacterFaction VALUES (3, 'Bards College');
+INSERT INTO CharacterFaction VALUES (4, 'Bards College');
+INSERT INTO CharacterFaction VALUES (5, 'Greybeards');
+INSERT INTO CharacterFaction VALUES (6, 'Bards College');
+--------------------------------------------
+INSERT INTO CharacterMagic VALUES (1, 'Restoration');
+INSERT INTO CharacterMagic VALUES (2, 'Illusion');
+--------------------------------------------
+INSERT INTO CharacterSkills VALUES (3, 'Armor');
+INSERT INTO CharacterSkills VALUES (3, 'Stealing');
+INSERT INTO CharacterSkills VALUES (2, 'Crafting');
+INSERT INTO CharacterSkills VALUES (1, 'Swordsmanship');
+--------------------------------------------
+INSERT INTO CharacterStats VALUES (3, 100);
+INSERT INTO CharacterStats VALUES (2, 200);
+INSERT INTO CharacterStats VALUES (1, 555);
+--------------------------------------------
+INSERT INTO Monster VALUES (100, 100, 10, 50, 1, 'cow', 100, 5, NULL, NULL, NULL);
+INSERT INTO Monster VALUES (105, 100, 50, 100, 2, 'goblin', 0, 5, NULL, NULL, NULL);
+INSERT INTO Monster VALUES (110, 100, 60, 100, 3, 'dragon', 0, 5, NULL, NULL, NULL);
+INSERT INTO Monster VALUES (115, 100, 70, 200, 4, 'chicken', 500, 5, NULL, NULL, NULL);
+INSERT INTO Monster VALUES (120, 100, 99, 250, 4, 'squirrel', 1000, 100, 1, 10, 17);
+--------------------------------------------
+INSERT INTO DamageMulti VALUES (120, 1000);
+INSERT INTO DamageMulti VALUES (110, 5);
+INSERT INTO DamageMulti VALUES (115, 353);
 
 -- SET FEEDBACK ON
 -- COMMIT;
@@ -482,13 +518,17 @@ WHERE M.monsterLevel > 50
 MINUS
 SELECT M.id, M.monsterLevel, M.locationID
 FROM Monster M, Locations L
-WHERE M.locationID = L.locationID;
+WHERE M.locationID = L.locationID AND L.locType = 'Plains';
 
 /*
 
 Q070 A Non-correlated subquery
 
 */
+SELECT C1.refID, C1.name
+FROM NPC C1
+WHERE C1.charLevel < 10 AND
+	   C1.refID IN (SELECT W.refID FROM WEAPON W);
 
 /*
 
