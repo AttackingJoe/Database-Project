@@ -1,6 +1,14 @@
--- SPOOL skyrimdb.out
--- SET ECHO ON
+SPOOL project.out
+SET ECHO ON
 SET LINESIZE 1000
+/*
+CIS 353 - Database Design Project
+Steven Bouwkamp
+Caitlin Crowe
+Joshua Crum
+Bryce Hutton
+ */
+
 
 DROP TABLE Weapon CASCADE CONSTRAINTS;
 DROP TABLE WeaponType CASCADE CONSTRAINTS;
@@ -35,14 +43,10 @@ CREATE TABLE Locations (
   locType    CHAR(20) NOT NULL,
   refID      INTEGER,
   locatedIn  INTEGER,
-  -- SKY_l2: each location ID must be unique
+  -- SKY_l1: each location ID must be unique
   CONSTRAINT SKY_l1 PRIMARY KEY (locationID),
   --   SKY_l2: if a location is located somewhere, it must be located in a real location.
   CONSTRAINT SKY_l2 FOREIGN KEY (locatedIn) REFERENCES Locations (locationID)
-DEFERRABLE INITIALLY DEFERRED
---SKY_l3: RefID: The ruler of a location needs to be a valid NPC
--- CONSTRAINT SKY_l3 FOREIGN KEY (refID) REFERENCES NPC(refID)
--- DEFERRABLE INITIALLY DEFERRED
 );
 
 --
@@ -63,12 +67,12 @@ CREATE TABLE NPC (
   --   SKY_c3: The character charClass has to be 'player', 'merchant', 'bandit', 'mage', 'fighter', or 'civilian'.
   CONSTRAINT SKY_c3 CHECK (charClass IN ('player', 'merchant', 'bandit', 'mage', 'fighter', 'civilian')),
   --   SKY_c4: The character level has to be greater than 0, but less than 101.
-  CONSTRAINT SKY_c4 CHECK (NOT (charLevel < 1 AND charLevel > 100)),
+  CONSTRAINT SKY_c4 CHECK (NOT (charLevel < 1 OR charLevel > 100)),
   --   SKY_c5: The character race has to be 'Altmer', 'Argonian', 'Bosmer', 'Breton', 'Dunmer', 'Imperial', 'Khajiit', 'Nord', 'Orsimer', or 'Redguard'.
   CONSTRAINT SKY_c5 CHECK (race IN
                            ('Altmer', 'Argonian', 'Bosmer', 'Breton', 'Dunmer', 'Imperial', 'Khajiit', 'Nord', 'Orsimer', 'Redguard')),
   -- SKY_c6: The location of the character must be valid
-  CONSTRAINT SKY_c6 FOREIGN KEY (locationID) REFERENCES Locations (locationID) DEFERRABLE INITIALLY DEFERRED
+  CONSTRAINT SKY_c6 FOREIGN KEY (locationID) REFERENCES Locations (locationID)
 );
 --
 --
@@ -132,12 +136,6 @@ CREATE TABLE Monster (
   timeSummoned INTEGER,
   --   SKY_m1: This constraint makes sure the level is between 1 and 100
   CONSTRAINT SKY_m1 CHECK (NOT (monsterLevel < 1 OR monsterLevel > 100)),
-  /*
-  SKY_m2: This constraint checks to make sure that if the monster isn't summoned that it has a refID
-  refID comes from it being summoned, so commenting this out for now
-  ALSO - there is something wrong with the relational operator
-  */
-  --   CONSTRAINT SKY_m2 CHECK ((refID OR timeSummoned) AND (NOT (refID AND timeSummoned))),
   --   SKY_m3: monster health must be greater than or equal to 100
   CONSTRAINT SKY_m3 CHECK (NOT (health < 100)),
   --   SKY_m4: checks to make sure that the total loot dropped by a monster is within a specific range dependant upon their level.
@@ -231,104 +229,11 @@ CREATE TABLE QuestLocated (
   CONSTRAINT SKY_ql3 FOREIGN KEY (questName) REFERENCES Quests (questName) DEFERRABLE INITIALLY DEFERRED
 );
 
--- -- foreign keys
--- ALTER TABLE Weapon
---   ADD FOREIGN KEY (refID) REFERENCES NPC (refID)
--- DEFERRABLE INITIALLY DEFERRED;
---
--- ALTER TABLE Weapon
---   ADD FOREIGN KEY (wName) REFERENCES WeaponType (wName)
--- DEFERRABLE INITIALLY DEFERRED;
---
--- ALTER TABLE Enchantment
---   ADD FOREIGN KEY (wID) REFERENCES Weapon (wID)
--- DEFERRABLE INITIALLY DEFERRED;
---
--- ALTER TABLE NPC
---   ADD FOREIGN KEY (locationID) REFERENCES Locations (locationID)
--- DEFERRABLE INITIALLY DEFERRED;
---
--- ALTER TABLE Monster
---   ADD FOREIGN KEY (refID) REFERENCES NPC (refID)
--- DEFERRABLE INITIALLY DEFERRED;
---
--- ALTER TABLE Locations
---   ADD FOREIGN KEY (locatedIn) REFERENCES Locations (locationID)
--- DEFERRABLE INITIALLY DEFERRED;
---
--- ALTER TABLE Locations
---   ADD FOREIGN KEY (refID) REFERENCES NPC (refID)
--- DEFERRABLE INITIALLY DEFERRED;
---
--- ALTER TABLE DamageMulti
---   ADD FOREIGN KEY (id) REFERENCES Monster (id)
--- DEFERRABLE INITIALLY DEFERRED;
---
--- ALTER TABLE CharacterSkills
---   ADD FOREIGN KEY (refID) REFERENCES NPC (refID)
--- DEFERRABLE INITIALLY DEFERRED;
---
--- ALTER TABLE CharacterMagic
---   ADD FOREIGN KEY (refID) REFERENCES NPC (refID)
--- DEFERRABLE INITIALLY DEFERRED;
---
---
--- ALTER TABLE CharacterStats
---   ADD FOREIGN KEY (refID) REFERENCES NPC (refID)
--- DEFERRABLE INITIALLY DEFERRED;
---
--- ALTER TABLE CharacterFaction
---   ADD FOREIGN KEY (refID) REFERENCES NPC (refID)
--- DEFERRABLE INITIALLY DEFERRED;
---
--- ALTER TABLE QuestStarted
---   ADD FOREIGN KEY (refID) REFERENCES NPC (refID);
---
--- ALTER TABLE QuestLocated
---   ADD FOREIGN KEY (locationID) REFERENCES Locations (locationID)
--- DEFERRABLE INITIALLY DEFERRED;
-
--- end of foreign keys
-
-
---
+-- ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD';
 --------------------------------------------------------------------------------------------------------------
 --Populate the database
 --------------------------------------------------------------------------------------------------------------
---
--- ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD';
---
---
--- COMMENTING ALL OF THESE OUT FOR NOW: ALL TYPES MUST BE STRINGS
--- Insert into WeaponType values ('Dagger', 10, 1, 2, slashing, one-handed);
--- Insert into WeaponType values ('Mace', 5, 2, 3, bludgeoning, one-handed);
--- Insert into WeaponType values ('Sword', 8, 3, 4, piercing, one-handed);
--- Insert into WeaponType values ('War Axe', 7, 5, 5, slashing, one-handed);
--- Insert into WeaponType values ('BattleAxe', 4, 7, 7, slashing, two-handed);
--- Insert into WeaponType values ('Greatsword', 3, 8, 7, piercing, two-handed);
--- Insert into WeaponType values ('Warhammer', 2, 10, 9, bludgeoning, two-handed);
--- Insert into WeaponType values ('Bow', 1, 1, 5, piercing, two-handed);
--- Insert into WeaponType values ('Crossbow', 5, 1, 2, piercing, two-handed);
---
--- Insert into Weapons values (1, 4, 10, 2, iron, dagger);
--- Insert into Weapons values (2, 5, 18, 3, steel, dagger);
--- Insert into Weapons values (3, 6, 30, 3, orchalcum, dagger);
--- Insert into Weapons values (4, 6, 95, 4, moonstone, dagger);
--- Insert into Weapons values (5, 9, 165, 5, glass, dagger);
--- Insert into Weapons values (6, 10, 290, 5, ebony, dagger);
--- Insert into Weapons values (7, 11, 500, 6, daedra heart, dagger);
--- Insert into Weapons values (8, 12, 600, 7, dragonbone, dagger);
---
---
--- Insert into Weapons values (9, 9, 35, 13, iron, mace);
--- Insert into Weapons values (10, 10, 65, 14, steel, mace);
--- Insert into Weapons values (11, 11, 105, 15, orchalcum, mace);
--- Insert into Weapons values (12, 14, 330, 17, moonstone, mace);
--- Insert into Weapons values (13, 14, 575, 18, glass, mace);
--- Insert into Weapons values (14, 16, 1000, 19, ebony, mace);
--- Insert into Weapons values (15, 16, 1750, 20, daedra heart, mace);
--- Insert into Weapons values (16, 17, 2000, 24, dragonbone, mace);
--- SET FEEDBACK OFF
+SET FEEDBACK OFF
 --------------------------------------------
 INSERT INTO Locations VALUES(1, 'Cloudy', 'Plains', NULL, NULL);
 INSERT INTO Locations VALUES(2, 'Stormy', 'City', 4, 1);
@@ -421,8 +326,8 @@ INSERT INTO DamageMulti VALUES (120, 1000);
 INSERT INTO DamageMulti VALUES (110, 5);
 INSERT INTO DamageMulti VALUES (115, 353);
 
--- SET FEEDBACK ON
--- COMMIT;
+SET FEEDBACK ON
+COMMIT;
 --------------------------------------------
 /*
 Queries to print out database. These are NOT the official queries
@@ -455,38 +360,7 @@ SELECT *
 FROM QuestStarted;
 SELECT *
 FROM QuestLocated;
-/*
-SQL queries go there along with the query number and the features that it demonstrates.
-Via the specs for the project:
 
-1. A comment line stating the query number and the feature(s) it demonstrates
-
-(e.g. – Q25 – correlated subquery).
-2. A comment line stating the query in English.
-3. The SQL code for the query.
- */
-/*
-
-REMOVE THIS BEFORE SUBMITTING - FOR REFERENCE ONLY
-
-At a minimum, your queries must demonstrate the features listed below. You may of course demonstrate
-more than one feature in any one query and thus end up having to write fewer, but more interesting,
-
-queries.
-1. A join involving at least four relations.
-2. A self-join.
-3. UNION, INTERSECT, and/or MINUS.
-4. SUM, AVG, MAX, and/or MIN.
-
-5. GROUP BY, HAVING, and ORDER BY, all appearing in the same query
-6. A correlated subquery.
-7. A non-correlated subquery.
-8. A relational DIVISION query.
-9. An outer join query.
-
-10. A RANK query.
-11. A Top-N query.
- */
 /*
 Q10 - Joining 4 tables
 
@@ -562,7 +436,6 @@ SELECT RANK (500) WITHIN GROUP
 FROM Weapon;
 
 /*
-
 Q110: Top-N query
 Checks to see what the 2 most valuable enchantments are
  */
@@ -573,11 +446,10 @@ WHERE ROWNUM < 3;
 /*
 Q120: GROUP BY, HAVING, and ORDER BY
 Checks for all weapons with more than one type
-
 */
 SELECT w.wname, count(*)
 FROM weapon w, weapontype t
-where t.wname = w.wname
+WHERE t.wname = w.wname
 GROUP BY w.wname HAVING count(*) > 1;
 
 /*
@@ -586,16 +458,16 @@ Averages the weapon damage
 */
 SELECT MAX(Attack) AS maxAttack, MIN(Attack) as minAttack, AVG(Attack) as avgAttack
 FROM weapon;
-/*
+
 
 /*
 Q140: Correlated Sub-Query
 Finds all weapons in a location.
 */
-select w.wid 
-from weapon w
-where w.attack > 5 and exists 
-(select * from locations l where w.locationid = l.locationid);
+SELECT w.wid
+FROM weapon w
+WHERE w.attack > 5 and EXISTS
+(SELECT  * FROM locations l WHERE w.locationid = l.locationid);
 
 /*
 Testing of the four ICs that are listed in the final documentation
@@ -604,10 +476,32 @@ Via the specs for the project:
 Include the following items for every IC that you test (Important: see the next section titled
 “Submit a final report” regarding which ICs to test).
 A comment line stating: Testing: < IC name>
-A SQL INSERT, DELETE, or UPDATE that will test the IC.
+
+/* Testing: SKY_c1 NPC Table
+Ensures that the primary key of an NPC is unique */
+INSERT INTO NPC VALUES (1, 'n', 'CoolGuy', 'M', 'Khajiit', 'bandit', 39, 5);
+
+/* Testing: SKY_c6 NPC Table
+Ensured that the NPCS location is valid */
+INSERT INTO NPC VALUES (100, 'n', 'NotAsCoolGuy', 'M', 'Khajiit', 'bandit', 39, 50);
+
+/* Testing: SKY_c4 NPC Table
+Ensures a character's level is between 1 and 100;
 */
--- SET ECHO OFF
--- SPOOL OFF
+INSERT INTO NPC VALUES (10, 'n', 'FinalFinalFinalFinal', 'M', 'Khajiit', 'bandit', 101, 5);
+INSERT INTO NPC VALUES (10, 'n', 'bot', 'M', 'Khajiit', 'bandit', -1, 5);
+
+
+/*
+Testing SKY_m4 :Ensures that a monster's value of its loot is not greater than 100 times its level
+ */
+
+INSERT INTO Monster VALUES (990, 100, 5, 50000, 4, 'squirrel', 100, 10, NULL, NULL, NULL);
+COMMIT;
+SET ECHO OFF
+SPOOL OFF
+
+
 
 
 
